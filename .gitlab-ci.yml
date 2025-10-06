@@ -3,9 +3,19 @@ stages:
   - test
   - deploy
 
+default:
+  before_script:
+    - export NVM_DIR="$HOME/.nvm"
+    - '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+    - nvm install 22
+    - nvm use 22
+    - node -v
+    - npm -v
+
 # Build Stage
 build:
   stage: build
+  image: node:18
   script:
     - echo "Testing Shell Executor"
     - node --version || echo "Node.js not found"
@@ -16,9 +26,8 @@ build:
     - npm run build
   artifacts:
     paths:
-      - build/
+      - dist/
     expire_in: 1 week
-
 test:
   stage: test
   script:
