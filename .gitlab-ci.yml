@@ -6,29 +6,31 @@ stages:
 # Build Stage
 build:
   stage: build
+  image: node:18
   script:
+    - echo "Testing Shell Executor"
+    - node --version || echo "Node.js not found"
+    - npm --version || echo "npm not found"
+    - npm --version
+    - npx --version
     - npm ci
     - npm run build
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 week
 
-# Test Stage
 test:
   stage: test
   script:
-    - npm ci
-    - npm run build
     - npx cypress run
 
-deploy:
+docker-build:
   stage: deploy
   script:
-    # Stop and remove the existing container if it exists
-    - if [ "$(docker ps -aq -f name=tweetle-app)" ]; then docker rm -f tweetle-app; fi
-
-    # Remove the old image if it exists
-    - if [ "$(docker images -q tweetle-app)" ]; then docker rmi tweetle-app; fi
-
-    # Build the Docker image
+    - docker stop tweetle-app-staging || true
+    - docker rm tweetle-app-staging || true
     - docker build -t tweetle-app .
-
-    # Run the new container
-    - docker run -d -p 3000:3000 --name tweetle-app tweetle-app
+    - docker run --env-file .env -d --name=tweetle-app-staging --network=tweetle-network -p 3000:3000 tweetle-app
+  only:
+    - main
