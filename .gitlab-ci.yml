@@ -6,7 +6,6 @@ stages:
 # Build Stage
 build:
   stage: build
-  image: node:18
   script:
     - echo "Testing Shell Executor"
     - node --version || echo "Node.js not found"
